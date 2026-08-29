@@ -1,12 +1,12 @@
 name: Bug report
-description: Tell us about something that is not working as expected.
+description: Report something that is not working as expected.
 title: "[Bug]: "
 labels:
   - bug
 body:
   - type: markdown
     attributes:
-      value: Thanks for helping us improve the community build. Remove credentials and private server details before posting.
+      value: Thanks for taking the time to report this. Remove credentials and private server details before posting.
   - type: input
     id: version
     attributes:
