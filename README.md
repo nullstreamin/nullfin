@@ -8,6 +8,8 @@ Remux brings Stremio add-ons, local files, WebDAV sources, IPTV, and music into 
 
 This fork stays close to the original Remux project. Community changes are kept small on purpose: setup should be easier, releases should be predictable, and bringing in new Remux work should not turn into a rewrite.
 
+It also carries tested compatibility fixes for [Strand](docs/strand.md), including complete source lists, fast source-picker responses, and file sizes supplied by Stremio-style add-ons such as StreamNZB and AIOStreams.
+
 ## What it does
 
 - Uses Stremio add-ons, local files, WebDAV, IPTV, and torrents as media sources.
@@ -31,6 +33,8 @@ services:
 ```
 
 Open `http://localhost:3000`, create the admin account, and add your media sources from the Addons page.
+
+If you use Strand, follow the short [Strand setup guide](docs/strand.md). No special image or patch is required; the compatibility work is included in this build.
 
 The `latest` tag is the current stable community build. Back up the data directory before changing versions.
 
