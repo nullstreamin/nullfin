@@ -1,25 +1,25 @@
 <div align="center">
   <img width="180" height="180" src="logo.png" alt="Nullfin logo">
   <h1>Nullfin</h1>
-  <p>A community-maintained media server with a Jellyfin-compatible API.</p>
+  <p>A small community build made to play nicely with Strand.</p>
 </div>
 
-Nullfin brings Stremio add-ons, local files, WebDAV sources, IPTV, and music into one library. It works with Jellyfin clients such as Strand, Infuse, Swiftfin, and Jellyfin for Android, so the apps you already use do not need to change.
+Nullfin takes your Stremio add-ons and puts their streams behind a Jellyfin-compatible server. Add it to Strand, connect the add-ons you already use, and that is pretty much the idea.
 
-This fork stays close to the original Remux project. Community changes are kept small on purpose: setup should be easier, releases should be predictable, and bringing in new Remux work should not turn into a rewrite.
+This build exists because the normal setup had a few annoying rough edges in Strand. We fixed the ones we kept running into and bundled them here so nobody else has to repeat the same tinkering.
 
-It also carries tested compatibility fixes for [Strand](docs/strand.md), including complete source lists, fast source-picker responses, and file sizes supplied by Stremio-style add-ons such as StreamNZB and AIOStreams.
+## What is different
 
-## What it does
+- Strand gets the complete source list instead of one `Remote - Unknown` entry.
+- The source picker opens without waiting for every remote file to be probed first.
+- File sizes can come straight from the add-on when they are available.
+- Add-on scores show up in Strand's source list.
+- Selecting a source still uses the normal playback checks, so the faster list does not skip the important part.
+- The fixes work with standard Stremio streaming add-ons, not just one specific service.
 
-- Uses Stremio add-ons, local files, WebDAV, IPTV, and torrents as media sources.
-- Serves the library through a Jellyfin-compatible API.
-- Keeps playback progress and continue-watching data in sync.
-- Supports multiple users, library filters, and per-user access.
-- Provides a built-in admin dashboard for setup and maintenance.
-- Reads stream details from RemuxDB so clients can show audio and subtitle tracks.
+Other Jellyfin clients keep their normal behavior. The Strand-specific shortcuts only turn on when the request identifies itself as Strand.
 
-## Run it with Docker
+## Run it
 
 ```yaml
 services:
@@ -32,32 +32,20 @@ services:
       - ./data:/data
 ```
 
-Open `http://localhost:3000`, create the admin account, and add your media sources from the Addons page.
+Open `http://localhost:3000`, make the admin account, and add your Stremio manifest URLs from the Addons page. Then add Nullfin to Strand as a Jellyfin server.
 
-If you use Strand, follow the short [Strand setup guide](docs/strand.md). No special image or patch is required; the compatibility work is included in this build.
+That is enough for most setups. There is a slightly longer [Strand guide](docs/strand.md) if you want it.
 
-The `latest` tag is the current stable community build. Back up the data directory before changing versions.
+## A couple of sensible notes
 
-## Build it locally
+Keep the data folder persistent and back it up before updating. Pin `ghcr.io/nullstreamin/nullfin:v0.30.0` instead of `latest` if you would rather update manually.
 
-You will need Rust, [cargo-make](https://github.com/sagiegurari/cargo-make), and the [Dioxus CLI](https://dioxuslabs.com/learn/0.6/getting_started/).
+Manifest URLs can contain API keys or personal tokens, so do not paste configured URLs into screenshots, bug reports, or public Compose files.
 
-```sh
-cargo install --force cargo-make
-cargo install dioxus-cli
-cp .env.example .env
-cargo make jellyfin-web
-cargo make dev
-```
+## Updates
 
-## Keeping the fork current
-
-We bring in changes from the original Remux repository in reviewed batches. Each update is built and tested before a community image is published. The short maintainer checklist is in [docs/updates.md](docs/updates.md).
-
-## Contributing
-
-Bug reports and focused pull requests are welcome. Please explain what changed, why it helps, and how you tested it. Small changes are easier to review and easier to carry forward.
+The plan is to keep Nullfin close to the project it came from and bring over useful changes without turning maintenance into a second job. New builds will be tested before the `latest` tag moves.
 
 ## Credits and license
 
-Nullfin is based on [Remux by lostb1t](https://github.com/lostb1t/remux) and continues under the [GNU Affero General Public License v3.0](LICENSE). Existing copyright and license notices remain with their respective authors.
+Nullfin is a community fork of [Remux by lostb1t](https://github.com/lostb1t/remux). It remains licensed under the [GNU Affero General Public License v3.0](LICENSE), and the original copyright and license notices are preserved.
