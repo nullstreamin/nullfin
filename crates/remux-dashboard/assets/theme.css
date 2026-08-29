@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
 /* ── Design tokens ────────────────────────────────────────────────── */
 :root {
   --bg:             #f2f2f2;
@@ -23,8 +21,8 @@
   --info:           #2980b9;
   --warning:        #e67e22;
   --hover-overlay:  rgba(0,0,0,.04);
-  --font-head: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-head: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", monospace;
   --radius-sm: 2px;
   --radius-md: 3px;
   --radius-lg: 4px;
@@ -587,7 +585,7 @@ html, body {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
   overflow: hidden;
 }
 
@@ -597,27 +595,26 @@ html, body {
 }
 
 .login-brand-label {
-  font-family: var(--font-mono);
-  font-size: .58rem;
+  font-family: var(--font-head);
+  font-size: .82rem;
+  font-weight: 700;
   color: var(--primary);
-  letter-spacing: .18em;
-  text-transform: uppercase;
+  letter-spacing: 0;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .login-title {
   font-size: 1.5rem;
-  font-weight: 900;
-  letter-spacing: -.03em;
+  font-weight: 700;
+  letter-spacing: -.02em;
   color: var(--text);
   margin: 0;
-  text-transform: uppercase;
 }
 
 .login-subtitle {
-  font-family: var(--font-mono);
-  font-size: .7rem;
+  font-family: var(--font-head);
+  font-size: .82rem;
   color: var(--text-muted);
   margin-top: 4px;
 }
@@ -1232,11 +1229,11 @@ html, body {
 
 .wizard-card {
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: none;
   overflow: hidden;
 }
 
@@ -1247,9 +1244,8 @@ html, body {
 
 .wizard-title {
   font-size: 1.3rem;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: -.02em;
-  text-transform: uppercase;
   color: var(--text);
   margin: 0;
 }
@@ -1257,75 +1253,11 @@ html, body {
 .wizard-body { padding: 24px 28px 28px; }
 
 .wizard-desc {
-  font-family: var(--font-mono);
-  font-size: .72rem;
+  font-family: var(--font-head);
+  font-size: .82rem;
   color: var(--text-muted);
   margin: 0 0 4px;
   line-height: 1.6;
-}
-
-/* ── Wizard step indicator ───────────────────────────────────────── */
-.wizard-steps {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  padding: 20px 28px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.wizard-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.wizard-step-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  background: var(--panel);
-  color: var(--text-dim);
-  font-family: var(--font-mono);
-  font-size: .65rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition);
-}
-
-.wizard-step-active {
-  border-color: var(--primary);
-  background: var(--primary-dim);
-  color: var(--primary);
-}
-
-.wizard-step-done {
-  border-color: var(--success);
-  background: rgba(0, 146, 69, .1);
-  color: var(--success);
-}
-
-.wizard-step-label {
-  font-family: var(--font-mono);
-  font-size: .6rem;
-  color: var(--text-dim);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.wizard-step-line {
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-  margin: 0 8px;
-  align-self: center;
-  margin-bottom: 20px;
 }
 
 .wizard-actions {
