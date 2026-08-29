@@ -113,8 +113,8 @@ fn App() -> Element {
                 div { class: "login-page",
                     div { class: "login-card",
                         div { class: "login-header",
-                            a { href: "/", class: "login-brand-label", "Remux" }
-                            p { class: "connecting", "Starting up…" }
+                            a { href: "/", class: "login-brand-label", "Nullfin" }
+                            p { class: "connecting", "Starting…" }
                         }
                     }
                 }
@@ -132,8 +132,8 @@ fn App() -> Element {
                         div { class: "login-page",
                             div { class: "login-card",
                                 div { class: "login-header",
-                                    a { href: "/", class: "login-brand-label", "Remux" }
-                                    p { class: "connecting", "Starting up…" }
+                                    a { href: "/", class: "login-brand-label", "Nullfin" }
+                                    p { class: "connecting", "Starting…" }
                                 }
                             }
                         }
@@ -143,8 +143,8 @@ fn App() -> Element {
                         div { class: "login-page",
                             div { class: "login-card",
                                 div { class: "login-header",
-                                    a { href: "/", class: "login-brand-label", "Remux" }
-                                    h1 { class: "login-title", "Admin Dashboard" }
+                                    a { href: "/", class: "login-brand-label", "Nullfin" }
+                                    h1 { class: "login-title", "Can't sign in" }
                                 }
                                 div { class: "login-body",
                                     div { class: "alert-error", "Admin access required." }
@@ -249,7 +249,7 @@ fn Login(on_login: EventHandler) -> Element {
                         }
                         store_credentials(StoredServer {
                             id: result.server_id,
-                            name: "Remux".to_string(),
+                            name: "Nullfin".to_string(),
                             manual_address: url,
                             access_token: token,
                             user_id: user
@@ -278,9 +278,9 @@ fn Login(on_login: EventHandler) -> Element {
         div { class: "login-page",
             div { class: "login-card",
                 div { class: "login-header",
-                    span { class: "login-brand-label", "Remux" }
-                    h1 { class: "login-title", "Admin Dashboard" }
-                    p { class: "login-subtitle", "Sign in to continue" }
+                    span { class: "login-brand-label", "Nullfin" }
+                    h1 { class: "login-title", "Sign in" }
+                    p { class: "login-subtitle", "Use your admin account." }
                 }
                 div { class: "login-body",
                     if server_url.read().is_none() {
@@ -347,25 +347,6 @@ fn Login(on_login: EventHandler) -> Element {
 }
 
 #[component]
-fn WizardStep(n: u8, label: &'static str, active: bool, done: bool) -> Element {
-    let dot_class = if done {
-        "wizard-step-dot wizard-step-done"
-    } else if active {
-        "wizard-step-dot wizard-step-active"
-    } else {
-        "wizard-step-dot"
-    };
-    rsx! {
-        div { class: "wizard-step",
-            div { class: "{dot_class}",
-                if done { "✓" } else { "{n}" }
-            }
-            span { class: "wizard-step-label", "{label}" }
-        }
-    }
-}
-
-#[component]
 fn Wizard(on_complete: EventHandler) -> Element {
     let mut step = use_signal(|| 0_u8);
     let mut server_name = use_signal(String::new);
@@ -410,22 +391,13 @@ fn Wizard(on_complete: EventHandler) -> Element {
     rsx! {
         div { class: "wizard-page",
             div { class: "wizard-card",
-
-                div { class: "wizard-steps",
-                    WizardStep { n: 1, label: "Server",  active: *step.read() == 0, done: *step.read() > 0 }
-                    div { class: "wizard-step-line" }
-                    WizardStep { n: 2, label: "Account", active: *step.read() == 1, done: *step.read() > 1 }
-                    div { class: "wizard-step-line" }
-                    WizardStep { n: 3, label: "Done",    active: *step.read() == 2, done: false }
-                }
-
                 div { class: "wizard-header",
-                    span { class: "login-brand-label", "Remux" }
+                    span { class: "login-brand-label", "Nullfin" }
                     h2 { class: "wizard-title",
                         {match *step.read() {
-                            0 => "Server Configuration",
-                            1 => "Create Admin Account",
-                            _ => "Setup Complete",
+                            0 => "Name your server",
+                            1 => "Make your login",
+                            _ => "You're done",
                         }}
                     }
                 }
@@ -466,7 +438,7 @@ fn Wizard(on_complete: EventHandler) -> Element {
                                 style: "display:flex;flex-direction:column;gap:16px",
 
                                 p { class: "wizard-desc",
-                                    "Choose a name for this server. You can connect Stremio and other media sources from the Addons page after setup."
+                                    "Call it whatever you want. You can add Stremio addons after this."
                                 }
 
                                 div { class: "field",
@@ -475,7 +447,7 @@ fn Wizard(on_complete: EventHandler) -> Element {
                                         id: "w-name",
                                         r#type: "text",
                                         class: "field-input",
-                                        placeholder: "My Remux Server",
+                                        placeholder: "My Nullfin Server",
                                         value: "{server_name}",
                                         oninput: move |e| server_name.set(e.value()),
                                     }
@@ -504,7 +476,7 @@ fn Wizard(on_complete: EventHandler) -> Element {
                                         }
                                     }
                                     p { class: "field-hint",
-                                        "This controls regional ratings and release information. It does not limit where you can use the server."
+                                        "This is only used for ratings and release info."
                                     }
                                 }
 
@@ -560,7 +532,7 @@ fn Wizard(on_complete: EventHandler) -> Element {
                                 style: "display:flex;flex-direction:column;gap:16px",
 
                                 p { class: "wizard-desc",
-                                    "Create the administrator account you will use to log in."
+                                    "This is the account you'll use to change settings."
                                 }
 
                                 div { class: "field",
@@ -620,7 +592,7 @@ fn Wizard(on_complete: EventHandler) -> Element {
                         _ => rsx! {
                             div { style: "display:flex;flex-direction:column;gap:20px",
                                 p { class: "wizard-desc",
-                                    "Your server and admin account are ready. After signing in, open Addons to connect your media sources."
+                                    "That's it. Sign in, then open Addons to connect your sources."
                                 }
                                 div { class: "wizard-actions",
                                     button {
