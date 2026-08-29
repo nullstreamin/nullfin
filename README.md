@@ -1,10 +1,10 @@
 <div align="center">
-  <img width="180" height="180" src="logo.png" alt="Remux logo">
-  <h1>Remux</h1>
+  <img width="180" height="180" src="logo.png" alt="Nullfin logo">
+  <h1>Nullfin</h1>
   <p>A community-maintained media server with a Jellyfin-compatible API.</p>
 </div>
 
-Remux brings Stremio add-ons, local files, WebDAV sources, IPTV, and music into one library. It works with Jellyfin clients such as Infuse, Swiftfin, and Jellyfin for Android, so the apps you already use do not need to change.
+Nullfin brings Stremio add-ons, local files, WebDAV sources, IPTV, and music into one library. It works with Jellyfin clients such as Strand, Infuse, Swiftfin, and Jellyfin for Android, so the apps you already use do not need to change.
 
 This fork stays close to the original Remux project. Community changes are kept small on purpose: setup should be easier, releases should be predictable, and bringing in new Remux work should not turn into a rewrite.
 
@@ -23,8 +23,8 @@ It also carries tested compatibility fixes for [Strand](docs/strand.md), includi
 
 ```yaml
 services:
-  remux:
-    image: ghcr.io/nullstreamin/remux:latest
+  nullfin:
+    image: ghcr.io/nullstreamin/nullfin:latest
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -60,4 +60,4 @@ Bug reports and focused pull requests are welcome. Please explain what changed, 
 
 ## Credits and license
 
-This project is based on [Remux by lostb1t](https://github.com/lostb1t/remux) and continues under the [GNU Affero General Public License v3.0](LICENSE). Existing copyright and license notices remain with their respective authors.
+Nullfin is based on [Remux by lostb1t](https://github.com/lostb1t/remux) and continues under the [GNU Affero General Public License v3.0](LICENSE). Existing copyright and license notices remain with their respective authors.
