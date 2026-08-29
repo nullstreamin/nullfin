@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="180" height="180" src="logo.png" alt="Nullfin logo">
+  <img width="180" height="180" src="nullfin-logo.png" alt="Nullfin logo">
   <h1>Nullfin</h1>
   <p>A small community build made to play nicely with Strand.</p>
 </div>
