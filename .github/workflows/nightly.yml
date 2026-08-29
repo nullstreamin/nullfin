@@ -10,7 +10,7 @@ permissions:
   packages: write
 
 env:
-  REGISTRY_IMAGE: ghcr.io/lostb1t/remux
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   check-changes:
@@ -74,7 +74,7 @@ jobs:
     with:
       version: ${{ needs.version.outputs.version }}
       cargo_version: ${{ needs.version.outputs.version }}
-      docker_tags: -t ghcr.io/lostb1t/remux:nightly
+      docker_tags: -t ghcr.io/${{ github.repository }}:nightly
     secrets: inherit
 
   publish-nightly:
