@@ -201,7 +201,13 @@ impl From<db::Media> for api::MediaSourceInfo {
         let probe_size = source
             .probe_data
             .as_ref()
-            .and_then(|p| p.size);
+            .and_then(|p| p.size)
+            .or_else(|| {
+                source
+                    .stream_info
+                    .as_ref()
+                    .and_then(|si| si.size)
+            });
         let mut media_streams = source
             .probe_data
             .map(|mut p| {
