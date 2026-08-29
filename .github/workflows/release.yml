@@ -2,91 +2,36 @@ name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Version without the leading v, for example 0.28.0
+        required: true
+        type: string
 
 permissions:
   contents: write
   packages: write
-
-env:
-  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   test:
     name: Test
     uses: ./.github/workflows/test.yml
 
-  preview:
-    name: Preview release version
-    needs: test
-    runs-on: ubuntu-latest
-    outputs:
-      new_release_published: ${{ steps.release.outputs.new_release_published }}
-      new_release_version: ${{ steps.release.outputs.new_release_version }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Semantic Release (dry run)
-        id: release
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          dry_run: true
-          extra_plugins: |
-            semantic-release-cargo
-            @semantic-release/changelog
-            @semantic-release/git
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CARGO_REGISTRY_TOKEN: "not-publishing-to-crates-io"
-
   build:
     name: Build
-    needs: preview
-    if: needs.preview.outputs.new_release_published == 'true'
+    needs: test
     uses: ./.github/workflows/build.yml
     with:
-      version: ${{ needs.preview.outputs.new_release_version }}
-      cargo_version: ${{ needs.preview.outputs.new_release_version }}
+      version: ${{ inputs.version }}
+      cargo_version: ${{ inputs.version }}
       docker_tags: >-
-        -t ghcr.io/${{ github.repository }}:${{ needs.preview.outputs.new_release_version }}
+        -t ghcr.io/${{ github.repository }}:v${{ inputs.version }}
         -t ghcr.io/${{ github.repository }}:latest
     secrets: inherit
 
-  semantic-release:
-    name: Semantic Release
-    needs: [preview, build]
-    if: needs.preview.outputs.new_release_published == 'true'
-    runs-on: ubuntu-latest
-    outputs:
-      new_release_version: ${{ steps.release.outputs.new_release_version }}
-      new_release_git_tag: ${{ steps.release.outputs.new_release_git_tag }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Semantic Release
-        id: release
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          extra_plugins: |
-            semantic-release-cargo
-            @semantic-release/changelog
-            @semantic-release/git
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CARGO_REGISTRY_TOKEN: "not-publishing-to-crates-io"
-
   publish-release:
     name: Publish release
-    needs: [preview, semantic-release]
-    if: needs.preview.outputs.new_release_published == 'true'
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Download server binary (linux-amd64)
@@ -131,15 +76,10 @@ jobs:
           pattern: remux-desktop-*
           merge-multiple: true
 
-      - name: Checkout source
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ needs.semantic-release.outputs.new_release_git_tag }}
-          path: source
-
       - name: Prepare release assets
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          VERSION="${{ needs.preview.outputs.new_release_version }}"
           cp artifacts/linux-amd64/remux-server "remux-${VERSION}-linux-amd64"
           cp artifacts/linux-arm64/remux-server "remux-${VERSION}-linux-arm64"
           cp artifacts/macos-amd64/remux-server "remux-${VERSION}-macos-amd64"
@@ -149,25 +89,22 @@ jobs:
           tar -czf "remux-${VERSION}-dashboard.tar.gz" -C artifacts/dashboard .
           tar -czf "remux-${VERSION}-jellyfin-web.tar.gz" -C artifacts/jellyfin-web .
 
-      - name: Extract changelog for this release
-        run: |
-          VERSION="${{ needs.preview.outputs.new_release_version }}"
-          awk "/^#+ \[?${VERSION}\]?/{found=1; next} found && /^#+ \[/{exit} found{print}" \
-            source/CHANGELOG.md > release-notes.md
-          if [ ! -s release-notes.md ]; then
-            echo "Release ${VERSION}" > release-notes.md
-          fi
-
       - name: Create release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
         run: |
-          VERSION="${{ needs.preview.outputs.new_release_version }}"
-          TAG="${{ needs.semantic-release.outputs.new_release_git_tag }}"
+          TAG="v${VERSION}"
+          if gh release view "${TAG}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release ${TAG} already exists. Choose a new version."
+            exit 1
+          fi
           gh release create "${TAG}" \
             --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
             --title "${TAG}" \
-            --notes-file release-notes.md \
+            --generate-notes \
+            --notes-start-tag "v0.27.0" \
             "remux-${VERSION}-linux-amd64" \
             "remux-${VERSION}-linux-arm64" \
             "remux-${VERSION}-macos-amd64" \
