@@ -6,7 +6,7 @@
 
 Nullfin takes your Stremio add-ons and puts their streams behind a Jellyfin-compatible server. Add it to Strand, connect the add-ons you already use, and that is pretty much the idea.
 
-This build exists because the normal setup had a few annoying rough edges in Strand. We fixed the ones we kept running into and bundled them here so nobody else has to repeat the same tinkering.
+This build exists because the normal setup had a few annoying rough edges in Strand. I fixed the ones I kept running into and bundled them here so nobody else has to repeat the same tinkering.
 
 ## What is different
 
