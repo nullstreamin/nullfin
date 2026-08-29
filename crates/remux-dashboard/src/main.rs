@@ -466,7 +466,7 @@ fn Wizard(on_complete: EventHandler) -> Element {
                                 style: "display:flex;flex-direction:column;gap:16px",
 
                                 p { class: "wizard-desc",
-                                    "Give your server a name. Add media addons (Stremio, Deezer, TMDB, …) on the Addons page after setup."
+                                    "Choose a name for this server. You can connect Stremio and other media sources from the Addons page after setup."
                                 }
 
                                 div { class: "field",
@@ -504,7 +504,7 @@ fn Wizard(on_complete: EventHandler) -> Element {
                                         }
                                     }
                                     p { class: "field-hint",
-                                        "Used for metadata ratings and regional release details."
+                                        "This controls regional ratings and release information. It does not limit where you can use the server."
                                     }
                                 }
 
@@ -620,8 +620,7 @@ fn Wizard(on_complete: EventHandler) -> Element {
                         _ => rsx! {
                             div { style: "display:flex;flex-direction:column;gap:20px",
                                 p { class: "wizard-desc",
-                                    "Your server is configured and the admin account has been created. "
-                                    "Click Finish to complete setup and go to the login page."
+                                    "Your server and admin account are ready. After signing in, open Addons to connect your media sources."
                                 }
                                 div { class: "wizard-actions",
                                     button {
