@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest a focused improvement for the community build.
+title: "[Idea]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would this improve?
+      description: Describe the problem or friction rather than only the proposed solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What are you doing today?
+      description: Share any workaround or alternative you already tried.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Fit
+      options:
+        - label: This can be added without breaking Jellyfin client compatibility.
+          required: true

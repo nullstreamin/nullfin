@@ -1,0 +1,56 @@
+name: Bug report
+description: Tell us about something that is not working as expected.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping us improve the community build. Remove credentials and private server details before posting.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Include the release tag or container tag you are using.
+      placeholder: v0.28.0 or latest
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation
+      options:
+        - Docker
+        - Desktop app
+        - Built from source
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Select...
+        3. See...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste only the relevant section. Remove credentials, tokens, private URLs, and personal media details.
+      render: shell
+  - type: textarea
+    id: details
+    attributes:
+      label: Anything else?
+      description: Client, browser, operating system, screenshots, or other useful context.
