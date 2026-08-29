@@ -1562,7 +1562,12 @@ async fn stremio_streams(
                 seeders: metadata.seeders,
                 size: sd
                     .and_then(|d| d.size)
-                    .or(s.size),
+                    .or(s.size)
+                    .or_else(|| {
+                        s.behavior_hints
+                            .as_ref()
+                            .and_then(|hints| hints.video_size)
+                    }),
                 duration: s.duration,
                 subtitles: s
                     .subtitles
