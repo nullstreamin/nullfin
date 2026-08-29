@@ -96,7 +96,7 @@ pub fn DashboardLayout() -> Element {
     let route = use_route::<Route>();
 
     let page_title = match route {
-        Route::DashboardRoute => "Remux",
+        Route::DashboardRoute => "Nullfin",
         Route::AddonsRoute => "Addons",
         Route::LibraryRoute => "Library",
         Route::IptvRoute => "IPTV",
@@ -131,7 +131,7 @@ pub fn DashboardLayout() -> Element {
                 class: if *sidebar_open.read() { "sidebar sidebar-open" } else { "sidebar" },
 
                 div { class: "sidebar-brand",
-                    h1 { class: "brand-title", style: "margin:0", "Remux" }
+                    h1 { class: "brand-title", style: "margin:0", "Nullfin" }
                 }
 
                 div { class: "sidebar-nav",
