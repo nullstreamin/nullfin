@@ -1,6 +1,6 @@
-# Updating from the original Remux project
+# Updating Nullfin from the original Remux project
 
-The goal is to stay close enough to Remux that updates remain routine. Community changes should be small, focused, and easy to test on their own.
+The goal is to keep Nullfin close enough to Remux that updates remain routine. Community changes should be small, focused, and easy to test on their own.
 
 ## Before starting
 
