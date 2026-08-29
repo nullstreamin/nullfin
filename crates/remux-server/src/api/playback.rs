@@ -146,7 +146,13 @@ async fn items_playbackinfo_inner(
     id: Uuid,
     q: api::PlaybackInfoQuery,
 ) -> Result<impl IntoResponse> {
-    let media_source_id = q.media_source_id;
+    // Strand sends the parent item ID as MediaSourceId while opening its source
+    // picker. Other Jellyfin clients use that shape for auto-play, where Remux
+    // intentionally narrows to one source. For Strand it must remain a version
+    // list request or every addon result collapses into "Remote - Unknown".
+    let is_strand = session.device.app_name.eq_ignore_ascii_case("strand");
+    let media_source_id = strand_media_source_id(&session.device.app_name, id, q.media_source_id);
+    let skip_initial_probe = is_strand && media_source_id.is_none();
 
     trace!(?id, ?q, "items_playbackinfo");
 
@@ -206,6 +212,8 @@ async fn items_playbackinfo_inner(
                 .user
                 .id,
         ),
+        skip_initial_probe,
+        display_score_for_strand: is_strand,
     });
     let is_live = media.is_live();
     let is_track_item = media.is_track();
@@ -687,6 +695,18 @@ async fn items_playbackinfo_inner(
 
     trace!(?info, "items_playbackinfo_result");
     Ok(Json(info))
+}
+
+fn strand_media_source_id(
+    app_name: &str,
+    item_id: Uuid,
+    requested_id: Option<Uuid>,
+) -> Option<Uuid> {
+    if app_name.eq_ignore_ascii_case("strand") && requested_id == Some(item_id) {
+        None
+    } else {
+        requested_id
+    }
 }
 
 static NO_STREAMS_VIDEO: &[u8] = include_bytes!("../../assets/no-streams.mp4");
@@ -1198,6 +1218,20 @@ mod tests {
         authenticated_server, insert_test_source, insert_test_source_of_kind,
         insert_test_source_with_external_subtitle, new_test_server,
     };
+
+    #[test]
+    fn strand_parent_id_opens_the_full_source_list() {
+        let item_id = uuid::Uuid::new_v4();
+
+        assert_eq!(
+            super::strand_media_source_id("Strand", item_id, Some(item_id)),
+            None
+        );
+        assert_eq!(
+            super::strand_media_source_id("Jellyfin Web", item_id, Some(item_id)),
+            Some(item_id)
+        );
+    }
 
     #[test]
     fn item_runtime_fills_missing_source_duration() {
