@@ -80,14 +80,18 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
         run: |
-          cp artifacts/linux-amd64/remux-server "remux-${VERSION}-linux-amd64"
-          cp artifacts/linux-arm64/remux-server "remux-${VERSION}-linux-arm64"
-          cp artifacts/macos-amd64/remux-server "remux-${VERSION}-macos-amd64"
-          cp artifacts/macos-arm64/remux-server "remux-${VERSION}-macos-arm64"
-          chmod +x "remux-${VERSION}-linux-amd64" "remux-${VERSION}-linux-arm64" \
-                   "remux-${VERSION}-macos-amd64" "remux-${VERSION}-macos-arm64"
-          tar -czf "remux-${VERSION}-dashboard.tar.gz" -C artifacts/dashboard .
-          tar -czf "remux-${VERSION}-jellyfin-web.tar.gz" -C artifacts/jellyfin-web .
+          cp artifacts/linux-amd64/remux-server "nullfin-${VERSION}-linux-amd64"
+          cp artifacts/linux-arm64/remux-server "nullfin-${VERSION}-linux-arm64"
+          cp artifacts/macos-amd64/remux-server "nullfin-${VERSION}-macos-amd64"
+          cp artifacts/macos-arm64/remux-server "nullfin-${VERSION}-macos-arm64"
+          chmod +x "nullfin-${VERSION}-linux-amd64" "nullfin-${VERSION}-linux-arm64" \
+                   "nullfin-${VERSION}-macos-amd64" "nullfin-${VERSION}-macos-arm64"
+          tar -czf "nullfin-${VERSION}-dashboard.tar.gz" -C artifacts/dashboard .
+          tar -czf "nullfin-${VERSION}-jellyfin-web.tar.gz" -C artifacts/jellyfin-web .
+          mv remux-desktop-linux-x86_64.deb nullfin-desktop-linux-x86_64.deb
+          mv remux-desktop-macos-aarch64.dmg nullfin-desktop-macos-aarch64.dmg
+          mv remux-desktop-macos-x86_64.dmg nullfin-desktop-macos-x86_64.dmg
+          mv remux-desktop-windows-x86_64.zip nullfin-desktop-windows-x86_64.zip
 
       - name: Create release
         env:
@@ -105,13 +109,13 @@ jobs:
             --title "${TAG}" \
             --generate-notes \
             --notes-start-tag "v0.27.0" \
-            "remux-${VERSION}-linux-amd64" \
-            "remux-${VERSION}-linux-arm64" \
-            "remux-${VERSION}-macos-amd64" \
-            "remux-${VERSION}-macos-arm64" \
-            "remux-${VERSION}-dashboard.tar.gz" \
-            "remux-${VERSION}-jellyfin-web.tar.gz" \
-            "remux-desktop-linux-x86_64.deb" \
-            "remux-desktop-macos-aarch64.dmg" \
-            "remux-desktop-macos-x86_64.dmg" \
-            "remux-desktop-windows-x86_64.zip"
+            "nullfin-${VERSION}-linux-amd64" \
+            "nullfin-${VERSION}-linux-arm64" \
+            "nullfin-${VERSION}-macos-amd64" \
+            "nullfin-${VERSION}-macos-arm64" \
+            "nullfin-${VERSION}-dashboard.tar.gz" \
+            "nullfin-${VERSION}-jellyfin-web.tar.gz" \
+            "nullfin-desktop-linux-x86_64.deb" \
+            "nullfin-desktop-macos-aarch64.dmg" \
+            "nullfin-desktop-macos-x86_64.dmg" \
+            "nullfin-desktop-windows-x86_64.zip"
