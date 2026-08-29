@@ -22,4 +22,4 @@ For dashboard changes, also open the setup and admin pages in a browser and chec
 
 ## Pull requests
 
-Tell us what changed, why it matters, and how you tested it. Screenshots are helpful for visible changes. A small pull request with a clear purpose is easier to review and easier to keep compatible with future Remux updates.
+Explain what changed, why it matters, and how you tested it. Screenshots are helpful for visible changes. A small pull request with a clear purpose is easier to review and easier to keep compatible with future Remux updates.
