@@ -38,7 +38,7 @@ That is enough for most setups. There is a slightly longer [Strand guide](docs/s
 
 ## A couple of sensible notes
 
-Keep the data folder persistent and back it up before updating. Pin `ghcr.io/nullstreamin/nullfin:v0.31.0` instead of `latest` if you would rather update manually.
+Keep the data folder persistent and back it up before updating. Pin `ghcr.io/nullstreamin/nullfin:v0.31.1` instead of `latest` if you would rather update manually.
 
 Manifest URLs can contain API keys or personal tokens, so do not paste configured URLs into screenshots, bug reports, or public Compose files.
 

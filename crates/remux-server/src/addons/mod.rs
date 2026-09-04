@@ -1065,6 +1065,7 @@ fn user_scoped(runtime: &AddonRuntime, override_ids: Option<&[Uuid]>) -> bool {
 /// `supports_type` believe an anime/series-only addon serves only movies,
 /// excluding it from `addons_for::<dyn StreamAddon>` for every
 /// Series/Season/Episode lookup.
+#[cfg(test)]
 fn recognized_manifest_media_kind(
     t: sdks::stremio::MediaType,
 ) -> Option<sdks::remux::MediaKind> {
@@ -1404,35 +1405,12 @@ impl AddonService {
                 config,
             ) {
                 Ok(mut caps) => {
-                    // Start with the preset's static metadata, then upgrade with live manifest data.
+                    // Runtime reloads happen after every addon mutation. Keep them local and
+                    // deterministic: reaching out to every enabled addon here can make a
+                    // multi-addon migration appear hung when one manifest is slow, offline,
+                    // or rate-limited. Live capability discovery remains available through
+                    // the addon API, while routing uses the persisted resource/type choices.
                     caps.metadata = preset.metadata();
-                    if let Some(ref kind) = caps.kind {
-                        match kind
-                            .available_info()
-                            .await
-                        {
-                            Ok(Some((resource_refs, raw_types))) => {
-                                caps.metadata
-                                    .supported_resources = resource_refs;
-                                if !raw_types.is_empty() {
-                                    caps.metadata
-                                        .supported_types = raw_types
-                                        .into_iter()
-                                        .filter_map(recognized_manifest_media_kind)
-                                        .collect();
-                                }
-                            }
-                            Ok(None) => {}
-                            Err(e) => {
-                                warn!(
-                                    addon_id = %addon.id,
-                                    name = %addon.name,
-                                    error = %e,
-                                    "failed to fetch addon manifest at load time"
-                                );
-                            }
-                        }
-                    }
                     runtimes.push(AddonRuntime { row: addon, caps });
                 }
                 Err(e) => warn!(

@@ -5,6 +5,7 @@ use axum::{
     response::IntoResponse,
 };
 use chrono::Utc;
+use std::time::Duration;
 use tracing::warn;
 
 use remux_macros::{delete, get, post};
@@ -22,7 +23,13 @@ use crate::{
 use axum_anyhow::ApiResult as Result;
 use remux_sdks::remux::MediaKind;
 
-async fn addon_to_dto(addon: Addon, config: &crate::Config) -> AddonDto {
+const ADDON_INFO_TIMEOUT: Duration = Duration::from_secs(10);
+
+async fn addon_to_dto(
+    addon: Addon,
+    config: &crate::Config,
+    discover_remote: bool,
+) -> AddonDto {
     let preset = registered_presets()
         .into_iter()
         .find(|p| {
@@ -58,11 +65,27 @@ async fn addon_to_dto(addon: Addon, config: &crate::Config) -> AddonDto {
                     .kind
                     .as_ref()
                     .map(|k| k.as_ref());
-                let info = if let Some(k) = kind {
-                    k.available_info()
+                let info = if discover_remote {
+                    if let Some(k) = kind {
+                        match tokio::time::timeout(
+                            ADDON_INFO_TIMEOUT,
+                            k.available_info(),
+                        )
                         .await
-                        .ok()
-                        .flatten()
+                        {
+                            Ok(Ok(info)) => info,
+                            Ok(Err(error)) => {
+                                warn!(addon_id = %addon.id, addon = %addon.name, %error, "addon capability discovery failed");
+                                None
+                            }
+                            Err(_) => {
+                                warn!(addon_id = %addon.id, addon = %addon.name, timeout_secs = ADDON_INFO_TIMEOUT.as_secs(), "addon capability discovery timed out");
+                                None
+                            }
+                        }
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 };
@@ -175,6 +198,7 @@ pub async fn list_addons(
                     &state
                         .ctx
                         .config,
+                    true,
                 )
             }),
     )
@@ -203,6 +227,7 @@ pub async fn get_addon(
             &state
                 .ctx
                 .config,
+            true,
         )
         .await,
     ))
@@ -212,7 +237,7 @@ pub async fn get_addon(
 #[post("/addons")]
 pub async fn create_addon(
     State(state): State<AppState>,
-    _session: auth::AdminSession,
+    session: auth::AdminSession,
     Json(mut payload): Json<CreateAddonRequest>,
 ) -> Result<(StatusCode, Json<AddonDto>)> {
     let presets = registered_presets();
@@ -266,10 +291,37 @@ pub async fn create_addon(
         .as_deref();
 
     let metadata = preset.metadata();
-    let avail_info = if let Some(k) = kind_ref {
-        k.available_info()
-            .await
-            .context_not_reachable()?
+    let needs_discovery = payload
+        .resources
+        .is_empty()
+        || payload
+            .types
+            .is_empty();
+    let is_strand = session
+        .device
+        .app_name
+        .eq_ignore_ascii_case("strand");
+    let mut discovery_failed = false;
+    let avail_info = if needs_discovery {
+        if let Some(k) = kind_ref {
+            match tokio::time::timeout(ADDON_INFO_TIMEOUT, k.available_info()).await {
+                Ok(Ok(info)) => info,
+                Ok(Err(error)) if is_strand => {
+                    warn!(addon = %payload.name, %error, "Strand migration saved unreachable addon as disabled");
+                    discovery_failed = true;
+                    None
+                }
+                Ok(Err(error)) => return Err(error.context_not_reachable()),
+                Err(_) if is_strand => {
+                    warn!(addon = %payload.name, timeout_secs = ADDON_INFO_TIMEOUT.as_secs(), "Strand migration saved timed-out addon as disabled");
+                    discovery_failed = true;
+                    None
+                }
+                Err(error) => return Err(error.context_not_reachable()),
+            }
+        } else {
+            None
+        }
     } else {
         None
     };
@@ -328,7 +380,7 @@ pub async fn create_addon(
         name: payload.name,
         resources,
         types,
-        enabled: true,
+        enabled: !discovery_failed,
         priority: payload.priority,
         created_at: now,
         updated_at: now,
@@ -365,6 +417,7 @@ pub async fn create_addon(
                 &state
                     .ctx
                     .config,
+                false,
             )
             .await,
         ),
@@ -504,6 +557,7 @@ pub async fn update_addon(
             &state
                 .ctx
                 .config,
+            false,
         )
         .await,
     ))
@@ -858,6 +912,37 @@ mod test {
                 .is_none(),
             "registry should have dropped the deleted addon"
         );
+    }
+
+    #[tokio::test]
+    async fn create_addon_with_declared_capabilities_does_not_fetch_manifest() {
+        let (server, _ctx, token) = authenticated_server().await;
+        let (h, v) = auth(&token);
+
+        let response = server
+            .post("/addons")
+            .add_header(h, v)
+            .json(&json!({
+                "preset": {
+                    "kind": "stremio",
+                    "config": {
+                        "manifest_url": "http://127.0.0.1:9/manifest.json"
+                    }
+                },
+                "name": "Imported Stream Addon",
+                "resources": ["stream"],
+                "types": ["movie"]
+            }))
+            .await;
+
+        response.assert_status(http::StatusCode::CREATED);
+        let created: AddonDto = response.json();
+        assert!(created.enabled);
+        assert_eq!(
+            created.resources,
+            vec![remux_sdks::stremio::ResourceType::Stream]
+        );
+        assert_eq!(created.types, vec![MediaKind::Movie]);
     }
 
     #[tokio::test]

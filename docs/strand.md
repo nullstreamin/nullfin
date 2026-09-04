@@ -17,6 +17,8 @@ StreamNZB, AIOStreams, and other Stremio-compatible add-ons remain separate serv
 - The initial Strand source list does not wait for remote media probing. Selecting an actual source still follows the normal probe and playback path.
 - File size falls back to add-on metadata, including `behaviorHints.videoSize`, when no probe has run yet.
 - When an add-on supplies a score, Strand receives it in the provider filename field its source picker renders.
+- Add-on migrations no longer wait for every enabled add-on manifest to reload after each imported entry.
+- Manifest discovery is capped at 10 seconds. If a Strand migration encounters an unavailable add-on, Nullfin preserves it as disabled so the remaining entries can finish importing.
 
 These behaviors activate only for requests identifying the client as Strand. Existing Jellyfin client behavior is preserved.
 
@@ -27,7 +29,7 @@ Keep the Nullfin data directory persistent and back it up before changing versio
 ```yaml
 services:
   nullfin:
-    image: ghcr.io/nullstreamin/nullfin:v0.29.0
+    image: ghcr.io/nullstreamin/nullfin:v0.31.1
     restart: unless-stopped
     ports:
       - "3000:3000"
