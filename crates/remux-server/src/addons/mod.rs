@@ -1065,7 +1065,6 @@ fn user_scoped(runtime: &AddonRuntime, override_ids: Option<&[Uuid]>) -> bool {
 /// `supports_type` believe an anime/series-only addon serves only movies,
 /// excluding it from `addons_for::<dyn StreamAddon>` for every
 /// Series/Season/Episode lookup.
-#[cfg(test)]
 fn recognized_manifest_media_kind(
     t: sdks::stremio::MediaType,
 ) -> Option<sdks::remux::MediaKind> {
@@ -1411,6 +1410,23 @@ impl AddonService {
                     // or rate-limited. Live capability discovery remains available through
                     // the addon API, while routing uses the persisted resource/type choices.
                     caps.metadata = preset.metadata();
+                    // Local and IPTV capabilities are derived synchronously from configuration,
+                    // so retain their precise media types without introducing network waits.
+                    if let Some(kind) = caps
+                        .kind
+                        .as_ref()
+                        .filter(|kind| matches!(kind.id(), "opendal" | "iptv"))
+                    {
+                        if let Some((resource_refs, raw_types)) = kind.available_info().await? {
+                            caps.metadata.supported_resources = resource_refs;
+                            if !raw_types.is_empty() {
+                                caps.metadata.supported_types = raw_types
+                                    .into_iter()
+                                    .filter_map(recognized_manifest_media_kind)
+                                    .collect();
+                            }
+                        }
+                    }
                     runtimes.push(AddonRuntime { row: addon, caps });
                 }
                 Err(e) => warn!(
