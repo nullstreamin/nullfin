@@ -10,13 +10,13 @@ use remux_sdks::{
 use tracing::debug;
 use uuid::Uuid;
 
-fn strand_score(title: &str) -> Option<&str> {
+fn source_score(title: &str) -> Option<&str> {
     title
         .rsplit_once("Score:")
         .and_then(|(_, value)| value.split_whitespace().next())
 }
 
-fn strand_provider_info(
+fn provider_info_with_score(
     stream_info: Option<&crate::stream::StreamInfo>,
     title: &str,
     enabled: bool,
@@ -25,7 +25,7 @@ fn strand_provider_info(
     if !enabled {
         return value;
     }
-    let Some(score) = strand_score(title) else {
+    let Some(score) = source_score(title) else {
         return value;
     };
     let Some(serde_json::Value::Object(info)) = value.as_mut() else {
@@ -63,11 +63,11 @@ pub(crate) struct StreamServiceConfig {
     pub show_ungrouped: bool,
     pub stream_filter: Option<StreamFilter>,
     pub user_id: Option<Uuid>,
-    /// Return Strand's initial version list without blocking on an upstream probe.
+    /// Return the initial version list without blocking on an upstream probe.
     /// A request for a selected source still probes normally before playback.
     pub skip_initial_probe: bool,
-    /// Include an upstream score in the provider filename Strand renders.
-    pub display_score_for_strand: bool,
+    /// Include an upstream score in the provider filename when supported.
+    pub display_score_in_filename: bool,
 }
 
 /// Central service for stream selection on a single playback request.
@@ -83,7 +83,7 @@ pub(crate) struct StreamService {
     stream_filter: Option<StreamFilter>,
     user_id: Option<Uuid>,
     skip_initial_probe: bool,
-    display_score_for_strand: bool,
+    display_score_in_filename: bool,
     // Populated by resolve()
     group: Option<(Uuid, String, Vec<db::Media>)>,
     stream: Option<db::Media>,
@@ -100,7 +100,7 @@ impl StreamService {
             stream_filter: cfg.stream_filter,
             user_id: cfg.user_id,
             skip_initial_probe: cfg.skip_initial_probe,
-            display_score_for_strand: cfg.display_score_for_strand,
+            display_score_in_filename: cfg.display_score_in_filename,
             group: None,
             stream: None,
             streams: vec![],
@@ -612,10 +612,10 @@ impl StreamService {
             // Re-apply binge-group headers — ffmpeg probing produces a fresh
             // MediaSourceInfo and would otherwise drop provider hints.
             source.remux = Some(api::MediaSourceRemuxInfo {
-                provider_info: strand_provider_info(
+                provider_info: provider_info_with_score(
                     stream.stream_info.as_ref(),
                     &stream.title,
-                    self.display_score_for_strand,
+                    self.display_score_in_filename,
                 ),
             });
 
@@ -728,16 +728,16 @@ impl StreamService {
 }
 
 #[cfg(test)]
-mod strand_tests {
+mod source_score_tests {
     use super::*;
 
     #[test]
     fn parses_score_without_consuming_following_text() {
         assert_eq!(
-            strand_score("Release name • 🎯 Score: +69300 • NZBgeek"),
+            source_score("Release name • 🎯 Score: +69300 • NZBgeek"),
             Some("+69300")
         );
-        assert_eq!(strand_score("Release without score"), None);
+        assert_eq!(source_score("Release without score"), None);
     }
 }
 

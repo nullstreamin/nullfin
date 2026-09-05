@@ -1,23 +1,23 @@
 <div align="center">
   <img width="180" height="180" src="nullfin-logo.png" alt="Nullfin logo">
   <h1>Nullfin</h1>
-  <p>A small community build made to play nicely with Strand.</p>
+  <p>A small, practical bridge between Stremio add-ons and Jellyfin clients.</p>
 </div>
 
-Nullfin takes your Stremio add-ons and puts their streams behind a Jellyfin-compatible server. Add it to Strand, connect the add-ons you already use, and that is pretty much the idea.
+Nullfin takes the Stremio add-ons you already use and makes their streams available through a Jellyfin-compatible server. Connect your add-ons, point your preferred client at Nullfin, and you are ready to browse.
 
-This build exists because the normal setup had a few annoying rough edges in Strand. I fixed the ones I kept running into and bundled them here so nobody else has to repeat the same tinkering.
+I made this fork after running into the same rough edges over and over: incomplete source lists, slow pickers, and migrations that could stall on one unavailable add-on. The fixes live here so the setup is simpler for everyone who comes next.
 
 ## What is different
 
-- Strand gets the complete source list instead of one `Remote - Unknown` entry.
+- Compatible clients get the complete source list instead of one `Remote - Unknown` entry.
 - The source picker opens without waiting for every remote file to be probed first.
 - File sizes can come straight from the add-on when they are available.
-- Add-on scores show up in Strand's source list.
+- Add-on scores can appear directly in the source list.
 - Selecting a source still uses the normal playback checks, so the faster list does not skip the important part.
 - The fixes work with standard Stremio streaming add-ons, not just one specific service.
 
-Other Jellyfin clients keep their normal behavior. The Strand-specific shortcuts only turn on when the request identifies itself as Strand.
+Regular Jellyfin playback behavior stays intact. The faster source-list path is used only for clients that need that compatibility handling.
 
 ## Run it
 
@@ -32,9 +32,9 @@ services:
       - ./data:/data
 ```
 
-Open `http://localhost:3000`, make the admin account, and add your Stremio manifest URLs from the Addons page. Then add Nullfin to Strand as a Jellyfin server.
+Open `http://localhost:3000`, create the admin account, and add your Stremio manifest URLs from the Addons page. Then add Nullfin to your media client as a Jellyfin server.
 
-That is enough for most setups. There is a slightly longer [Strand guide](docs/strand.md) if you want it.
+That is enough for most setups. If an add-on cannot be reached during an import, Nullfin keeps it disabled so the rest of the migration can finish. You can fix or remove that entry afterward.
 
 ## A couple of sensible notes
 

@@ -237,7 +237,7 @@ pub async fn get_addon(
 #[post("/addons")]
 pub async fn create_addon(
     State(state): State<AppState>,
-    session: auth::AdminSession,
+    _session: auth::AdminSession,
     Json(mut payload): Json<CreateAddonRequest>,
 ) -> Result<(StatusCode, Json<AddonDto>)> {
     let presets = registered_presets();
@@ -297,27 +297,21 @@ pub async fn create_addon(
         || payload
             .types
             .is_empty();
-    let is_strand = session
-        .device
-        .app_name
-        .eq_ignore_ascii_case("strand");
     let mut discovery_failed = false;
     let avail_info = if needs_discovery {
         if let Some(k) = kind_ref {
             match tokio::time::timeout(ADDON_INFO_TIMEOUT, k.available_info()).await {
                 Ok(Ok(info)) => info,
-                Ok(Err(error)) if is_strand => {
-                    warn!(addon = %payload.name, %error, "Strand migration saved unreachable addon as disabled");
+                Ok(Err(error)) => {
+                    warn!(addon = %payload.name, %error, "Migration saved unreachable addon as disabled");
                     discovery_failed = true;
                     None
                 }
-                Ok(Err(error)) => return Err(error.context_not_reachable()),
-                Err(_) if is_strand => {
-                    warn!(addon = %payload.name, timeout_secs = ADDON_INFO_TIMEOUT.as_secs(), "Strand migration saved timed-out addon as disabled");
+                Err(_) => {
+                    warn!(addon = %payload.name, timeout_secs = ADDON_INFO_TIMEOUT.as_secs(), "Migration saved timed-out addon as disabled");
                     discovery_failed = true;
                     None
                 }
-                Err(error) => return Err(error.context_not_reachable()),
             }
         } else {
             None
